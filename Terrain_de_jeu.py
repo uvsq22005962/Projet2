@@ -12,14 +12,13 @@
 import tkinter as tk
 import random as rd
 
-
 ###############################################
 #Variables
 largeur_canv = 1000
 hauteur_canv = 1000
 color_canv = "grey30"
 couleur_quadr = 'grey60'
-cote = 20
+cote = 10
 racine = tk.Tk()
 canvas = tk.Canvas(racine, bg = color_canv, width = largeur_canv, height =hauteur_canv)
 
@@ -29,23 +28,13 @@ canvas = tk.Canvas(racine, bg = color_canv, width = largeur_canv, height =hauteu
 #Fonctions
 def case_eau() :
  nb = rd.randint(0,1)
- liste = []
- z = 0
- for n in range(2501) :
-      nb = rd.randint(0,1)
-      liste.append(nb)
-        for z in range(liste) :
-             if nb[z] == 0 :
-                for i in range(51):
-                    for j in range(51):
-                        canvas.create_rectangle((0 + i * 20,0 +j * 20 ),(20 + i * 20, 20 + j * 20), fill='blue')
-                        z += 1
-            else :
-                z += 1
-                print("")
-
-
-
+ for j in range(101) :
+    for i in range(101) :
+            nb = rd.randint(0,1)
+            if nb == 0 :
+                canvas.create_rectangle((i * 10,j * 10),(10 + i * 10,10 + j* 10 ), fill='blue')
+            else : 
+                canvas.create_rectangle((i *10 ,j * 10), (10 + i * 10 , 10 + j * 10), fill = 'grey')
 
 
 
