@@ -28,13 +28,13 @@ canvas = tk.Canvas(racine, bg = color_canv, width = largeur_canv, height =hauteu
 #Fonctions
 def case_eau() :
  nb = rd.randint(0,1)
- for j in range(101) :
-    for i in range(101) :
+ for j in range(100) :
+    for i in range(100) :
             nb = rd.randint(0,1)
             if nb == 0 :
-                canvas.create_rectangle((i * 10,j * 10),(10 + i * 10,10 + j* 10 ), fill='blue')
+                canvas.create_rectangle((i * cote,j * cote),(cote + i * cote,cote + j* cote ), fill='blue', outline = 'white')
             else : 
-                canvas.create_rectangle((i *10 ,j * 10), (10 + i * 10 , 10 + j * 10), fill = 'grey')
+                canvas.create_rectangle((i *cote ,j * cote), (cote + i * cote , cote + j * cote), fill ='grey', outline = 'white')
 
 
 
