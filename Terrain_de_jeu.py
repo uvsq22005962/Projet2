@@ -29,15 +29,8 @@ canvas = tk.Canvas(racine, bg = color_canv, width = largeur_canv, height =hauteu
 ###############################################
 #Fonctions
 def quadrillage() :
- """Dessine un quadrillage formé de carrés de côté Cote"""
-y = 0
-while y <= hauteur_canv :
-    canvas.create_line((0,y), (hauteur_canv, y), fill=couleur_quadr)
-    y += cote
-x = 0    
-while x <= largeur_canv :
-    canvas.create_line((x,0), (x,largeur_canv), fill=couleur_quadr)
-    x += cote
+
+    
 
 ###############################################
 #Programme principal
