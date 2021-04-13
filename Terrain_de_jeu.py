@@ -10,15 +10,14 @@
 #########################################
 #Import des fonctions
 import tkinter as tk
+import random as rd
 
 
 ###############################################
 #Variables
-largeur_canv = 500
-hauteur_canv = 500
+largeur_canv = 1000
+hauteur_canv = 1000
 color_canv = "grey30"
-nombre_de_ligne = input(int())
-nombre_de_colonne = input(int())
 couleur_quadr = 'grey60'
 cote = 20
 racine = tk.Tk()
@@ -28,8 +27,40 @@ canvas = tk.Canvas(racine, bg = color_canv, width = largeur_canv, height =hauteu
 
 ###############################################
 #Fonctions
-def quadrillage() :
+def case_eau() :
+ nb = rd.randint(0,1)
+ liste = []
+ z = 0
+ for n in range(2501) :
+      nb = rd.randint(0,1)
+      liste.append(nb)
+        for z in range(liste) :
+             if nb[z] == 0 :
+                for i in range(51):
+                    for j in range(51):
+                        canvas.create_rectangle((0 + i * 20,0 +j * 20 ),(20 + i * 20, 20 + j * 20), fill='blue')
+                        z += 1
+            else :
+                z += 1
+                print("")
 
+
+
+
+
+
+def quadrillage() :
+ y = 0
+ global hauteur_canv
+ global largeur_canv
+
+ while y <= hauteur_canv :
+    canvas.create_line((0,y), (largeur_canv,y), fill=couleur_quadr)
+    y += cote
+ x = 0    
+ while x <= largeur_canv :
+    canvas.create_line((x,0), (x, hauteur_canv), fill=couleur_quadr)
+    x += cote
     
 
 ###############################################
@@ -39,4 +70,5 @@ def quadrillage() :
 racine.title("Terrain_de_jeu")
 canvas.grid()
 quadrillage()
+case_eau()
 racine.mainloop()
