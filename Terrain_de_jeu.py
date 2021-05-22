@@ -8,139 +8,225 @@
 # https://discord.gg/fNQpuPM3yQ
 
 #########################################
-#Import des fonctions
+# Import des fonctions
 
-import tkinter as tk 
-import random as rd
 import copy as cp
+import random as rd
+import tkinter as tk
 
 ###############################################
-#Variables 
+# Variables
 
-global tableau, NB_COL, NB_LIG, COTE, compteur_clic, liste_sauvegarde, p, t, n, k
-
+compteur_formulaire = 0
 tableau = []
 liste_sauvegarde = []
+liste_transition = []
 compteur_clic = 0
-
-NB_COL = int(input("Veuillez saisir le nombre de colonnes: "))
-NB_LIG = int(input("Veuillez saisir le nombre de lignes: "))
-p = int(input("Veuillez définir la probabilité de case recouverte d'eau (en %): "))
-n = int(input("Veuillez définir le nombre d'activation pour l'automate: "))
-T = int(input("Veuillez définir le nombre minimum de cases voisines pour appliquer la règle: "))
-k = int(input("Veuillez définir l'ordre: "))
-
+liste_touche = ["Début"]
+perso = []
+NB_COL = 40
+NB_LIG = 40
+P = 50
+T = 5
+N = 4
+K = 1
 COTE = 20
-
 HAUTEUR = NB_LIG * COTE
 LARGEUR = NB_COL * COTE
 
-
 ###############################################
-#Fonctions
+# Fonctions
+
+
+def formulaire():
+    """Gère la gestion de l'interface en appelant la fonction recueille_donnee pour l'ensemble des paramètres. Elle organise donc l'interface en 15 boutons, 6 entrées et 6 labels.
+    """ 
+    recueille_donnee(" nombres de colonnes (par défaut: 50)", NB_COL, 2, 1, 2, 3)
+    recueille_donnee(" nombres de lignes (par défaut: 50)",NB_LIG, 4, 4, 5, 6)
+    recueille_donnee(" la probabilité de case recouverte d'eau en %,(par défaut: 50)", P, 6, 7, 8, 9)
+    recueille_donnee(" le nombre minimum de cases voisines pour appliquer la règle (par défaut: 5)", T, 8, 10, 11, 12)
+    recueille_donnee(" le nombre d'activation pour l'automate (par défaut: 4)", N, 10, 13, 14, 15)
+    recueille_donnee(" l'ordre (par défaut: 1)", K, 12, 16, 17, 18)
+
+
+def recueille_donnee(information, valeur, placement, entree, defaut, valide):
+    """Donne quelques consignes à l'utilisateur en créeant 2 labels.Puis, gère la création et le placement des entrées et des labels en prenant en paramètre l'information, la valeur associé et le placement.De plus, les paramètres defaut et valide permettent de créer les boutons Valider et Défaut et de les associer à leur entrées respectives. Enfin, crée et place les boutons désactivés bout_terrain, bout_sauv et bout_charger.
+    """
+    global bout_terrain, bout_sauv, bout_charger
+    mode_emploi = tk.Label(racine, text="Vous devez impérativement rentrer les valeurs en suivant l'ordre de placement des boutons.\nVous devez donc remplir le tableau de gauche à droite et de haut en bas.")
+    mode_emploi.grid(column=0, row=0)
+    mode_emploi2 = tk.Label(racine, text="Lorsque vous avez rentré votre valeur, validez là DIRECTEMENT après.\n Si vous voulez préserver la valeur par défaut,cliquez directement sur le boutton :défaut.")
+    mode_emploi2.grid(column=0, row=1)
+    indication = tk.Label(racine, text="Veuillez saisir"+information)
+    indication.grid(column=0, row=placement)
+    entree = tk.Entry(racine, width=10)
+    entree.grid(column=0, row=placement+1)
+    defaut = tk.Button(racine, text="Défaut", command=lambda:par_defaut(valeur, entree, defaut, valide))
+    defaut.grid(column=1, row=placement+1)
+    valide = tk.Button(racine, text="Valider", command=lambda:recuperation(valeur, entree, defaut, valide))
+    valide.grid(column=2, row=placement+1)
+    bout_terrain = tk.Button(racine, text="Lancement génération terrain de jeu", command=lancement_terrain, state="disabled")
+    bout_terrain.grid(column=0, row=14)
+    bout_sauv = tk.Button(racine, text="Sauvegarder", command=sauvegarder_terrain,state="disabled")
+    bout_sauv.grid(column=0, row=15)
+    bout_charger = tk.Button(racine, text="Charger", command=charger_terrain, state="disabled")
+    bout_charger.grid(column=0, row=16)
+
+
+def par_defaut(valeur, entree, defaut, valide):
+    """Préserve la valeurs par défaut pour la valeur de l'utilisateur puis désactive les boutons Défaut, Valider et l'entrée correspondants. Enfin,elle appelle la fonction liste
+    """
+    global compteur_formulaire
+    entree.config(state="disabled")
+    defaut.config(state="disabled")
+    valide.config(state="disabled")
+    compteur_formulaire += 1
+    valeur = int(float(valeur))
+    liste(valeur)
+
+
+def recuperation(valeur, entree, defaut, valide):
+    """Récupère la valeur entrée par l'utilisateur depuis l'interface puis désactive les boutons Défaut, Valider et l'entrée correspondants. Enfin, elle appelle la fonction liste"""
+    global compteur_formulaire
+    valeur = entree.get()
+    entree.config(state="disabled")
+    defaut.config(state="disabled")
+    valide.config(state="disabled")
+    compteur_formulaire += 1
+    valeur = int(float(valeur))
+    liste(valeur)
+
+
+def liste(v):
+    """Si le nombre de clic est inférieur ou égale à 6, la fonction ajoute la valeur passé en paramètre dans une liste. Au sixième clique, active le boutton: bout_terrain.Lorsque le compteur atteint 7, la liste attribue les valeurs à  NB_COL, NB_LIG, p, T, n, k et renvoie True """
+    global NB_COL, NB_LIG, P, T, N, K, HAUTEUR, LARGEUR
+    if compteur_formulaire <= 6:
+        liste_transition.append(v)
+    if compteur_formulaire == 6:
+        bout_terrain.config(state="normal")
+    elif compteur_formulaire == 7:
+        NB_COL, NB_LIG, P, T, N, K = liste_transition[0], liste_transition[1], liste_transition[2], liste_transition[3], liste_transition[4], liste_transition[5]
+        HAUTEUR = NB_LIG * COTE
+        LARGEUR = NB_COL * COTE
+        return True
+
+    
+def lancement_terrain():
+    """Active les boutons bout_charger et bout_sauv et désactive le bouton bout_terrain. Puis, elle génère le terrain du jeu à condition d'avoir recueillies les données de l'utilisateur."""
+    global compteur_formulaire, racine, canvas
+    bout_charger.config(state="normal")
+    bout_sauv.config(state="normal")
+    bout_terrain.config(state="disabled")
+    compteur_formulaire += 1
+    if liste([]):   # Autrement dit lorsque toutes les valeurs sont réunies.
+        for i in range(NB_COL):
+            tableau.append([0]*NB_LIG)
+        racine = tk.Tk()
+        racine.title("Terrain de jeu")
+        canvas = tk.Canvas(racine, width=LARGEUR, height=HAUTEUR)
+        canvas.grid(column=0, row=0, columnspan=2)
+        grille()
+        nombre_etape()
+        racine.bind("<1>", personnage)
+        racine.bind("<Right>", droite)
+        racine.bind("<Left>", gauche)
+        racine.bind("<Up>", haut)
+        racine.bind("<Down>", bas)
+        racine.bind("<Return>", annuler) 
+        racine.mainloop()
+
 
 def grille():
     """La fonction crée la grille composé de carré marrons ou bleus avec les données fournies par l'utilisateur"""
-    global i,j  #Pour y avoir acces dans les fonctions case_eau et case_terre
-    for i in range(NB_COL):      #Pour comprendre cette fonction, essayez de dessiner le rectangle (0,0), (COTE,COTE). Puis le carreau suivant (COTE,COTE),(2*COTE,2*COTE)
+    global i, j
+    for i in range(NB_COL): 
         for j in range(NB_LIG):
             if pourcentage():     
-                case_eau(i,j)
+                case_eau(i, j)
             else: 
-                case_terre(i,j)           
+                case_terre(i, j)           
 
 
 def pourcentage():
     """La fonction attribue True ou False à chaque case, en fonction du pourcentage donné par l'utilisateur"""
-    for nb in range(100):          #nb représente le "pour 100", en effet on le fait 100 fois
-        nb = rd.randint(1,100)     # la nouvelle valeur de nb est donnée au hasard (nb est muet)
-        if nb <= p:                # Pour 100 valeurs de nb fortuites on regarde lesquelles sont inferieurs à la probabilité (donc lesquelles respectent la probablité)
+    for nb in range(100):         
+        nb = rd.randint(1,99)  
+        if nb <= P:              
             return True
         else: 
             return False
     
 
-def case_eau(a,b):       #a pour i (colonnes) et b pour j (lignes)
-    """Cree la case de coordonées a,b et lie la liste
-       avec le canvas en lui associant la couleur bleu 
-       sur le canvas et le chiffre 1 dans la liste"""
+def case_eau(a, b):     
+    """Crée la case de coordonées a, b et lie la liste tableau avec le canvas en lui associant la couleur bleu sur le canvas et le chiffre 1 dans la liste tableau"""
     x, y = a*COTE, b*COTE
-    tableau[a][b] = 1    #1 correspond à bleu donc l'eau
+    tableau[a][b] = 1    # 1 correspond à bleu donc l'eau
     color = "blue"
-    carreau_blue = canvas.create_rectangle((x, y),(x+COTE, y+COTE), fill=color)
-    return carreau_blue
+    canvas.create_rectangle((x, y), (x+COTE, y+COTE), fill=color)
 
 
-def case_terre(a,b):
-    """Cree la case de coordonées a,b, et lie la liste
-       avec le canvas en lui associant la couleur marron sur le 
-       canvas et le chiffre 0 dans la liste"""
+def case_terre(a, b):
+    """Crée la case de coordonées a, b  et lie la liste tableau avec le canvas en lui associant la couleur marron sur le canvas et le chiffre 0 dans la liste tableau"""
     x, y = a*COTE, b*COTE
-    tableau[a][b] = 0   #0 correspond à marron donc la terre
+    tableau[a][b] = 0   # 0 correspond à marron donc la terre
     color = "brown"
-    carreau_marron = canvas.create_rectangle((x, y),(x+COTE, y+COTE), fill=color)
-    return carreau_marron
+    canvas.create_rectangle((x, y), (x+COTE, y+COTE), fill=color)
 
 
 def nb_case_eau(a, b):
-    """Retourne le nombre de cases bleus (recouverte d'eau)
-       autour de la case de coordonnées (i, j)"""
-    cpt = 0
-    for y in range(max(0, a-k), min(NB_COL,(a+k)+1)):                #si k=1, a-1 < a < a+1 (ordre 1, comme jeu de la vie)
-        for z in range(max(0, b-k), min(NB_LIG, (b+k)+1)):            
-            if tableau_memoire[y][z] == 1 and [y, z] != [a, b]:   #(mais dans les 4 coins a-1 ou a+1 n'existent pas )
-                cpt += 1
-    return cpt
+    """Renvoie le nombre de cases bleus (recouverte d'eau) autour de la case de coordonnées (a, b)"""
+    compteur_eau = 0
+    for y in range(max(0, a-K), min(NB_COL, (a+K)+1)):              
+        for z in range(max(0, b-K), min(NB_LIG, (b+K)+1)):          
+            if tableau_memoire[y][z] == 1 and [y, z] != [a, b]:  
+                compteur_eau += 1
+    return compteur_eau
 
-def conversion(a,b):
-    """Recueille la valeur du voisinnage défini par l'utilisateur et 
-       la compare avec le nombre de case recouverte d'eau pour agir en conséquence
-       avec la fonction case_eau ou case_terre"""
-    nb_eau = nb_case_eau(a, b)
-    if nb_eau >= T:
-        case_eau(a,b)
+
+def conversion(a, b):
+    """Si le nombre de case d'eau est supérieur ou égale à la valeur du voisinnage en a,b appel la fonction case_eau(a, b) sinon case_terre(a, b)"""
+    if nb_case_eau(a, b) >= T:
+        case_eau(a, b)
     else:
-        case_terre(a,b)
+        case_terre(a, b)
+
 
 def etape():
+    """Copie le tableau initial dans la variable tableau_mémoire afin de faire une étape de conversion toutes les cases du canvas, sans etre influencé par les conversions précédentes."""
     global tableau_memoire
-    """Copie le tableau initial afin de faire une étape de conversion toutes les
-     cases du canvas, sans etre influencé par les conversions précédentes."""
-    #ATTENTION, ici la conversion(i,j) modifie le tableau. Ainsi, on ne peut pas prendre ce tableau 
-    #pour les étapes car les valeurs de ce tableau changent à chaque étape sur une case. Donc un changement
-    #sur une case n, fausserait la conversion pour la case n+1, d'ou le tableau_memoire qui reste intact malgré
-    # les conversions(seul tableau est modfié), ensuite on récupère toutes les valeurs modifié dans le tableau_mémoire
     tableau_memoire = cp.deepcopy(tableau)
     for i in range(NB_COL):
         for j in range(NB_LIG):
-            conversion(i,j)
-    tableau_memoire = tableau  
-    return tableau_memoire
+            conversion(i, j)
+    tableau_memoire = tableau
     
 
 def nombre_etape():
-    """Réalise n fois la fonction étape, avec n donné par l'utilisateur"""
-    compte_n = 0
-    while compte_n <= n:
-        compte_n += 1
-        etape()
+    """Réalise n fois la fonction étape si n>0, si n=0 réalise une copie du tableau dans la variable tableau_mémoire"""
+    global tableau_memoire
+    if N > 0:
+        for i in range(N):
+            etape()
+    elif N == 0:
+        tableau_memoire = cp.deepcopy(tableau)
 
 
 def personnage(event):
-    """Creer le personnage sur une case terre, là ou l'utilisateur à cliqué 
-       et renvoie ses coordonnées sinon, la fonction supprime le personnage"""
-    global compteur_clic, perso, tableau_memoire, x0 , y0 , x1 , y1, a, b
+    """Creer le personnage sur une case terre, là ou l'utilisateur à cliqué et appel sauvegarde_deplacement, sinon la fonction supprime le personnage"""
+    global compteur_clic, perso, tableau_memoire, x0 , y0 , x1 , y1, a, b, liste_sauvegarde, liste_touche
     a,b = event.x // COTE, event.y // COTE
     x, y = a*COTE, b*COTE
     if compteur_clic % 2 == 0:
-        if tableau_memoire[a][b] == 0:     #doit se poser sur la terre
+        if tableau_memoire[a][b] == 0:    
             compteur_clic += 1
-            perso = canvas.create_rectangle((x, y),(x+COTE, y+COTE), fill="red")     
+            perso = canvas.create_rectangle((x, y), (x+COTE, y+COTE), fill="red")     
             x0 , y0 , x1 , y1 = canvas.coords(perso)
-            return x0 , y0 , x1 , y1
+            sauvegarde_deplacement()
     else:
         canvas.delete(perso)
         compteur_clic += 1
+        liste_sauvegarde = []
+        liste_touche = ["Début"]
 
 
 def verifie_droite(abscisse0, abscisse1):   
@@ -163,127 +249,165 @@ def verifie_bas(ordonnée0, ordonnée1):
     return max(ordonnée0, ordonnée1) < HAUTEUR
 
 
-def verifie_case(a,b):
-    """Etudie l'état de la case de coordonnées a,b et renvoie True
-       si la case étudié est de la terre (corespond à 0) """
-    nv_compteur = 0         
+def verifie_case(a, b):
+    """Etudie l'état de la case de coordonnées a, b et renvoie True si la case étudié est de la terre (correspond à 0) """
+    compteur_nb_eau = 0         
     if tableau_memoire[a][b] == 1:  
-        nv_compteur += 1
-    if nv_compteur == 0:
+        compteur_nb_eau += 1
+    if compteur_nb_eau == 0:
         return True
 
 
 def droite(event):
-    """Permet ou pas le déplacement du personnage vers la 
-       droite et appelle la fonction sauvegarde, lorsque l'utilisateur
-       clique sur la flèche de droite"""
-    global perso, x0, y0 , x1 , y1 
-    i, j = int(x0// COTE), int(y0// COTE)
-    if verifie_droite(x0,x1) and verifie_case(i+1,j):
-        canvas.move(perso,COTE,0) 
-        x0 , y0 , x1 , y1 = canvas.coords(perso)
+    """Permet ou pas le déplacement du personnage vers la droite et appelle la fonction sauvegarde_deplacement puis derniere_touche"""
+    global perso, x0, y0, x1, y1 
+    i, j = int(x0//COTE), int(y0//COTE)
+    if verifie_droite(x0, x1) and verifie_case(i+1, j):
+        canvas.move(perso, COTE, 0) 
+        x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
-        return  x0 , y0 , x1 , y1
-    else:
-        pass
+        derniere_touche("Autre")
 
 
 def gauche(event):
-    """Permet ou pas le déplacement du personnage vers la 
-       gauche et appelle la fonction sauvegarde, lorsque l'utilisateur
-       clique sur la flèche de gauche"""
-    global perso, x0, y0 , x1 , y1 
-    i, j = int(x0// COTE), int(y0// COTE)
-    if verifie_gauche(x0,x1) and verifie_case(i-1,j):
-        canvas.move(perso,-COTE,0) 
-        x0 , y0 , x1 , y1 = canvas.coords(perso)
+    """Permet ou pas le déplacement du personnage vers la gauche et appelle la fonction sauvegarde_deplacement puis derniere_touche"""
+    global perso, x0, y0, x1, y1 
+    i, j = int(x0//COTE), int(y0//COTE)
+    if verifie_gauche(x0, x1) and verifie_case(i-1, j):
+        canvas.move(perso, -COTE, 0) 
+        x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
-        return  x0 , y0 , x1 , y1
-    else:
-        pass
+        derniere_touche("Autre")
 
  
 def haut(event):
-    """Permet ou pas le déplacement du personnage vers le 
-       haut et appelle la fonction sauvegarde, lorsque l'utilisateur
-       clique sur la flèche du haut"""
-    global perso, x0, y0 , x1 , y1 
-    i, j = int(x0// COTE), int(y0// COTE)
-    if verifie_haut(y0,y1) and verifie_case(i, j-1):
-        canvas.move(perso,0,-COTE) 
-        x0 , y0 , x1 , y1 = canvas.coords(perso)
+    """Permet ou pas le déplacement du personnage vers le haut et appelle la fonction sauvegarde_deplacement puis derniere_touche"""
+    global perso, x0, y0, x1, y1 
+    i, j = int(x0//COTE), int(y0//COTE)
+    if verifie_haut(y0, y1) and verifie_case(i, j-1):
+        canvas.move(perso, 0, -COTE) 
+        x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
-        return  x0 , y0 , x1 , y1
-    else:
-        pass
+        derniere_touche("Autre")
 
 
 def bas(event):
-    """Permet ou pas le déplacement du personnage vers le 
-       bas et appelle la fonction sauvegarde, lorsque l'utilisateur
-       clique sur la flèche du bas"""
-    global perso, x0, y0 , x1 , y1 
-    i, j = int(x0// COTE), int(y0// COTE)
-    if verifie_bas(y0,y1) and verifie_case(i, j+1):
-        canvas.move(perso,0,COTE) 
-        x0 , y0 , x1 , y1 = canvas.coords(perso)
+    """Permet ou pas le déplacement du personnage vers le bas et appelle la fonction sauvegarde_deplacement puis derniere_touche"""
+    global perso, x0, y0, x1, y1 
+    i, j = int(x0//COTE), int(y0//COTE)
+    if verifie_bas(y0, y1) and verifie_case(i, j+1):
+        canvas.move(perso, 0, COTE) 
+        x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
-        return  x0 , y0 , x1 , y1
-    else:
-        pass
+        derniere_touche("Autre")
 
 
 def sauvegarde_deplacement():
-    """Ajoute dans la liste_sauvegarde les coordonnées occupées
-       sucessivement par le personnagge"""
-    global liste_sauvegarde
+    """Ajoute dans la liste_sauvegarde les coordonnées successivement occupées par le personnagge"""
     liste_sauvegarde.append(canvas.coords(perso))
-    return liste_sauvegarde
 
 
 def annuler(event):
-    """Si la liste n'est pas vide, annuler permet à 
-       l'utilisateur de revenir à la dernière position occupé
-       avant son avant son déplacement """
-    global x0 , y0 , x1 , y1, perso, liste_sauvegarde
-    if liste_sauvegarde != [] :
-        x0 , y0 , x1 , y1 = liste_sauvegarde[-2]
-        canvas.coords(perso, x0 , y0 , x1 , y1)
+    """Si la liste contient au moins 2 éléments, permet à l'utilisateur de revenir à l'avant dernière position, puis supprime ces coordonnées et appelle la fonction derniere_touche"""
+    global x0, y0, x1, y1, perso, liste_sauvegarde, avant_derniere_position
+    if len(liste_sauvegarde) >= 2:
+        x0, y0, x1, y1 = liste_sauvegarde[-2]
+        avant_derniere_position = liste_sauvegarde[-2]
+        canvas.coords(perso, x0, y0, x1, y1)
         del liste_sauvegarde[-2]
-    else: 
-        pass
-    
-def sauvegarder():
-    pass
+        derniere_touche("Retour")
 
-def charger():
-    pass
+
+def derniere_touche(x):
+    """Ajoute dans une liste la dernière touche sur laquelle l'utilisateur a cliqué à condition que le dernier élément de la liste soit différent de cette touche et appel gestion_annuler"""
+    if liste_touche[-1] != x:
+        liste_touche.append(x)
+        gestion_annuler()
+
+
+def gestion_annuler():
+    """Si l'utilisateur à cliqué sur retour puis sur une autre touche, l'avant dernière position est replacée dans la liste pour que le perso puisse revenir desssus"""
+    if liste_touche[-2:] == ["Retour", "Autre"]:
+        liste_sauvegarde[-2] = avant_derniere_position
+
+
+def sauvegarder_terrain():
+    """Sauvegarde le tableau_memoire dans le fichier sauvegarde_terrain.txt et appelle la fonction sauvegarde en fonction de la présence ou pas du personnage"""
+    fic = open("sauvegarde_terrain.txt", "w")
+    for i in range(NB_COL):
+        for j in range(NB_LIG):
+            fic.write(str(tableau_memoire[i][j])+"\n")
+    fic.close()
+    if canvas.coords(perso) == []:
+        sauvegarder_perso(-1)
+    else:
+        sauvegarder_perso(0)
+        
+
+def sauvegarder_perso(x):
+    """Sauvegarde les coordonnées du perso dans le fichier sauvegarde_perso.txt"""
+    global perso
+    if x == 0:
+        fic = open("sauvegarde_perso.txt", "w")
+        fic.write(str(canvas.coords(perso)[x])+" "+str(canvas.coords(perso)[x+1])+" "+str(canvas.coords(perso)[x+2])+" "+str(canvas.coords(perso)[x+3]))
+        fic.close()
+    else:
+        fic = open("sauvegarde_perso.txt", "w")
+        fic.write("")
+        fic.close()
+
+
+def charger_terrain():
+    """Charge le fichier sauvegarde_terrain.txt pour dessiner la grille et appelle la fonction charger_perso"""
+    fic = open("sauvegarde_terrain.txt", "r")
+    compteur = 0
+    for ligne in fic:
+        i, j = compteur // NB_LIG, compteur % NB_LIG
+        n = int(ligne)
+        x, y = i * COTE, j * COTE
+        if n == 0:
+            canvas.create_rectangle((x, y),(x+COTE, y+COTE),fill="brown")
+            tableau_memoire[i][j] = 0
+        else:
+            canvas.create_rectangle((x, y),(x+COTE, y+COTE),fill="blue")
+            tableau_memoire[i][j] = 1
+        compteur += 1
+    fic.close()
+    charger_perso()
+
+
+def charger_perso():
+    """Charge le fichier sauvegarde_perso.txt pour dessiner ou pas le personnage sur la grille"""
+    fic = open("sauvegarde_perso.txt", "r")
+    global perso, x0 , y0, x1, y1, liste_sauvegarde, liste_touche
+    COTE = 20
+    liste_sauvegarde = []
+    liste_touche = ["Début"]
+    for ligne in fic:
+        if ligne != "":
+            x0 , y0, x1, y1 = int(float(ligne.split()[0])), int(float(ligne.split()[1])), int(float(ligne.split()[2])), int(float(ligne.split()[3]))
+            perso = canvas.create_rectangle((x0, y0),(x0+COTE, y0+COTE), fill="red")
+            sauvegarde_deplacement()
+    fic.close()
 
 ###############################################
 #Programme principal
 
-for i in range(NB_COL):
-    tableau.append([0] * NB_LIG)
-
-
 racine = tk.Tk()
-racine.title("Terrain de jeu")
-canvas = tk.Canvas(racine, width=LARGEUR, height=HAUTEUR)
-bout_sauv = tk.Button(racine, text="Sauvegarder", command=sauvegarder)
-bout_charger = tk.Button(racine, text="Charger", command=charger)
-grille()
-nombre_etape()
-racine.bind("<1>", personnage)
-racine.bind("<Right>", droite)
-racine.bind("<Left>", gauche)
-racine.bind("<Up>", haut)
-racine.bind("<Down>", bas)
-racine.bind("<Return>", annuler) # touche entrée
-
-canvas.grid(columnspan=3)
-bout_sauv.grid(column=0, row=1)
-bout_charger.grid(column=2, row=1)
-
+racine.title("Programmation du terrain de jeu")
+formulaire()
 racine.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
