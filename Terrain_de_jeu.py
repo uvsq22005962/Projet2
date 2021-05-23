@@ -17,13 +17,6 @@ import tkinter as tk
 ###############################################
 # Variables
 
-compteur_formulaire = 0
-tableau = []
-liste_sauvegarde = []
-liste_transition = []
-compteur_clic = 0
-liste_touche = ["Début"]
-perso = []
 NB_COL = 50
 NB_LIG = 50
 P = 50
@@ -33,6 +26,14 @@ K = 1
 COTE = 20
 HAUTEUR = NB_LIG * COTE
 LARGEUR = NB_COL * COTE
+
+compteur_formulaire = 0
+tableau = []
+liste_sauvegarde = []
+liste_transition = []
+compteur_clic = 0
+liste_touche = ["Début"]
+perso = []
 
 ###############################################
 # Fonctions
@@ -338,7 +339,7 @@ def droite(event):
     """
     global perso, x0, y0, x1, y1 
     i, j = int(x0//COTE), int(y0//COTE)
-    if verifie_droite(x0, x1) and verifie_case(i+1, j) and presence_perso():
+    if verifie_droite(x0, x1) and verifie_case(i+1, j):
         canvas.move(perso, COTE, 0) 
         x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
@@ -352,7 +353,7 @@ def gauche(event):
     """
     global perso, x0, y0, x1, y1 
     i, j = int(x0//COTE), int(y0//COTE)
-    if verifie_gauche(x0, x1) and verifie_case(i-1, j) and presence_perso():
+    if verifie_gauche(x0, x1) and verifie_case(i-1, j):
         canvas.move(perso, -COTE, 0) 
         x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
@@ -366,7 +367,7 @@ def haut(event):
     """
     global perso, x0, y0, x1, y1 
     i, j = int(x0//COTE), int(y0//COTE)
-    if verifie_haut(y0, y1) and verifie_case(i, j-1) and presence_perso():
+    if verifie_haut(y0, y1) and verifie_case(i, j-1):
         canvas.move(perso, 0, -COTE) 
         x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
@@ -380,7 +381,7 @@ def bas(event):
     """
     global perso, x0, y0, x1, y1 
     i, j = int(x0//COTE), int(y0//COTE)
-    if verifie_bas(y0, y1) and verifie_case(i, j+1) and presence_perso():
+    if verifie_bas(y0, y1) and verifie_case(i, j+1):
         canvas.move(perso, 0, COTE) 
         x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
@@ -402,7 +403,7 @@ def annuler(event):
     et appelle la fonction derniere_touche.
     """
     global x0, y0, x1, y1, perso, liste_sauvegarde, avant_derniere_position
-    if len(liste_sauvegarde) >= 2 and presence_perso():
+    if len(liste_sauvegarde) >= 2:
         x0, y0, x1, y1 = liste_sauvegarde[-2]
         avant_derniere_position = liste_sauvegarde[-2]
         canvas.coords(perso, x0, y0, x1, y1)
@@ -414,7 +415,8 @@ def derniere_touche(x):
     """Ajoute dans une liste la dernière touche sur laquelle l'utilisateur
 
     a cliqué à condition que le dernier élément de la liste soit différent
-    de cette touche et appel gestion_annuler."""
+    de cette touche et appel gestion_annuler.
+    """
     if liste_touche[-1] != x:
         liste_touche.append(x)
         gestion_annuler()
@@ -432,8 +434,10 @@ def gestion_annuler():
 
 def sauvegarder_terrain():
     """Sauvegarde le tableau_memoire dans le fichier sauvegarde_terrain.txt
+
     et appelle la fonction sauvegarde_perso en fonction de la présence ou
-    pas du personnage."""
+    pas du personnage.
+    """
     fic = open("sauvegarde_terrain.txt", "w")
     for i in range(NB_COL):
         for j in range(NB_LIG):
@@ -488,7 +492,9 @@ def charger_terrain():
 
 def charger_perso():
     """Charge le fichier sauvegarde_perso.txt pour dessiner ou pas le
-    personnage sur la grille."""
+
+    personnage sur la grille.
+    """
     fic = open("sauvegarde_perso.txt", "r")
     global perso, x0 , y0, x1, y1, liste_sauvegarde, liste_touche
     COTE = 20

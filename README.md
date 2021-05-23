@@ -11,7 +11,7 @@ Claude Chibout et Abdelkarim Bouraoui n'ont pas du tout participé au projet.
 
 # Explication du code:
 
-Premièrement, nous avons réussi tous les étapes qui composent le projet donc il ne devrait pas y avoir d'erreur. 
+Premièrement, nous avons réussi tous les étapes qui composent le projet donc il ne devrait pas y avoir d'erreur.  
 
 # Formulaire
 
@@ -25,7 +25,7 @@ ATTENTION à ne pas confondre les boutons Valider et Défaut.
 
 # Terrain de jeu
 
-Le personnage est assimilé à un carreau rouge. Vous pouvez le créer en cliquant (clique gauche) sur une case terre (marron). Vous pouvez le supprimer en cliquant une seconde fois sur le clique gauche et ce n'importe où sur le canvas. Si le personnage existe, vous pouvez le déplacer grace aux touches directionnelles du clavier. Vous pouvez également revenir sur l'avant dernière position occupée en cliquant sur la touche Entrée. Si vous créez un personnage, puis le supprimez, puis en créez un nouveau, si vous n'avez pas bougé entre temps, vous ne pourrez pas revenir en arrière. 
+Le personnage est assimilé à un carreau rouge. Vous pouvez le créer en cliquant (clique gauche) sur une case terre (marron). Vous pouvez le supprimer en cliquant une seconde fois sur le clique gauche et ce n'importe où sur le canvas. SI le personnage existe, vous pouvez le déplacer grace aux touches directionnelles du clavier. Vous pouvez également revenir sur l'avant dernière position occupée en cliquant sur la touche Entrée. Si vous créez un personnage, puis le supprimez, puis en créez un nouveau, si vous n'avez pas bougé entre temps, vous ne pourrez pas revenir en arrière. 
 
 # Sauvegarder et Charger
 
