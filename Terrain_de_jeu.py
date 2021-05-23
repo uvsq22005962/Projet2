@@ -24,8 +24,8 @@ liste_transition = []
 compteur_clic = 0
 liste_touche = ["Début"]
 perso = []
-NB_COL = 40
-NB_LIG = 40
+NB_COL = 50
+NB_LIG = 50
 P = 50
 T = 5
 N = 4
@@ -229,6 +229,12 @@ def personnage(event):
         liste_touche = ["Début"]
 
 
+def presence_perso():
+    """Renvoie vraie si le personnage existe"""
+    if canvas.coords(perso) != []:
+        return True
+
+
 def verifie_droite(abscisse0, abscisse1):   
     """Renvoie True si le maximum des abscisses est inférieur à la LARGEUR"""
     return max(abscisse0, abscisse1) < LARGEUR
@@ -262,7 +268,7 @@ def droite(event):
     """Permet ou pas le déplacement du personnage vers la droite et appelle la fonction sauvegarde_deplacement puis derniere_touche"""
     global perso, x0, y0, x1, y1 
     i, j = int(x0//COTE), int(y0//COTE)
-    if verifie_droite(x0, x1) and verifie_case(i+1, j):
+    if verifie_droite(x0, x1) and verifie_case(i+1, j) and presence_perso():
         canvas.move(perso, COTE, 0) 
         x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
@@ -273,7 +279,7 @@ def gauche(event):
     """Permet ou pas le déplacement du personnage vers la gauche et appelle la fonction sauvegarde_deplacement puis derniere_touche"""
     global perso, x0, y0, x1, y1 
     i, j = int(x0//COTE), int(y0//COTE)
-    if verifie_gauche(x0, x1) and verifie_case(i-1, j):
+    if verifie_gauche(x0, x1) and verifie_case(i-1, j) and presence_perso():
         canvas.move(perso, -COTE, 0) 
         x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
@@ -284,7 +290,7 @@ def haut(event):
     """Permet ou pas le déplacement du personnage vers le haut et appelle la fonction sauvegarde_deplacement puis derniere_touche"""
     global perso, x0, y0, x1, y1 
     i, j = int(x0//COTE), int(y0//COTE)
-    if verifie_haut(y0, y1) and verifie_case(i, j-1):
+    if verifie_haut(y0, y1) and verifie_case(i, j-1) and presence_perso():
         canvas.move(perso, 0, -COTE) 
         x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
@@ -295,7 +301,7 @@ def bas(event):
     """Permet ou pas le déplacement du personnage vers le bas et appelle la fonction sauvegarde_deplacement puis derniere_touche"""
     global perso, x0, y0, x1, y1 
     i, j = int(x0//COTE), int(y0//COTE)
-    if verifie_bas(y0, y1) and verifie_case(i, j+1):
+    if verifie_bas(y0, y1) and verifie_case(i, j+1) and presence_perso():
         canvas.move(perso, 0, COTE) 
         x0, y0, x1, y1 = canvas.coords(perso)
         sauvegarde_deplacement()
@@ -310,7 +316,7 @@ def sauvegarde_deplacement():
 def annuler(event):
     """Si la liste contient au moins 2 éléments, permet à l'utilisateur de revenir à l'avant dernière position, puis supprime ces coordonnées et appelle la fonction derniere_touche"""
     global x0, y0, x1, y1, perso, liste_sauvegarde, avant_derniere_position
-    if len(liste_sauvegarde) >= 2:
+    if len(liste_sauvegarde) >= 2 and presence_perso():
         x0, y0, x1, y1 = liste_sauvegarde[-2]
         avant_derniere_position = liste_sauvegarde[-2]
         canvas.coords(perso, x0, y0, x1, y1)
@@ -338,10 +344,10 @@ def sauvegarder_terrain():
         for j in range(NB_LIG):
             fic.write(str(tableau_memoire[i][j])+"\n")
     fic.close()
-    if canvas.coords(perso) == []:
-        sauvegarder_perso(-1)
-    else:
+    if presence_perso():
         sauvegarder_perso(0)
+    else:
+        sauvegarder_perso(-1)
         
 
 def sauvegarder_perso(x):
@@ -389,6 +395,7 @@ def charger_perso():
             perso = canvas.create_rectangle((x0, y0),(x0+COTE, y0+COTE), fill="red")
             sauvegarde_deplacement()
     fic.close()
+
 
 ###############################################
 #Programme principal
